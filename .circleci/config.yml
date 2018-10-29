@@ -1,0 +1,60 @@
+version: 2
+jobs:
+  build:
+    working-directory: ~/bands-web-scraper
+    docker:
+      - image: openjdk:8
+
+    environment:
+      - SBT_VERSION: 1.2.6
+
+    steps:
+      - run: echo 'export ARTIFACT_BUILD=$CIRCLE_PROJECT_REPONAME-$CIRCLE_BUILD_NUM.zip' >> $BASH_ENV
+      - run:
+          name: Get sbt binary
+          command: |
+                    apt update && apt install -y curl
+                    curl -L -o sbt-$SBT_VERSION.deb https://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb
+                    dpkg -i sbt-$SBT_VERSION.deb
+                    rm sbt-$SBT_VERSION.deb
+                    apt-get update
+                    apt-get install -y sbt python-pip git
+                    pip install awscli
+                    apt-get clean && apt-get autoclean
+      - checkout
+      - restore_cache:
+          key: sbt-cache
+      - run:
+          name: Compile bands-web-scraper dist package
+          command: cat /dev/null | sbt clean update dist
+      - store_artifacts:
+          path: target/universal/bands-web-scraper.zip
+          destination: bands-web-scraper
+      - save_cache:
+          key: sbt-cache
+          paths:
+            - "~/.ivy2/cache"
+            - "~/.sbt"
+            - "~/.m2"
+      - run: echo "Build"
+
+  unit-tests:
+    working-directory: ~/bands-web-scraper
+    docker:
+      - image: openjdk:8
+
+    environment:
+      - SBT_VERSION: 1.2.6
+
+    steps:
+      - checkout
+      - run: echo "Unit tests"
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build
+      - unit-tests:
+          requires:
+            - build
