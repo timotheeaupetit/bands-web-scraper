@@ -4,7 +4,7 @@ import java.nio.file.{FileSystem, FileSystems, Path}
 import java.util.StringTokenizer
 
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
-import cats.syntax.cartesian._
+import cats.implicits._
 import cats.{Monoid, Semigroup, SemigroupK, Show, Traverse}
 import com.music.utils.EnvironmentVariables._
 
@@ -148,11 +148,11 @@ trait ApplicationConfiguration {
                        src_url: String)
 
   def fApplicationConfig: ValidatedNel[ConfigError, AppConfig] = {
-    (require[String](APPLICATION)
-      |@| require[String](ENV_NAME)
-      |@| require[Int](PORT)
-      |@| require[String](APP_HOME)
-      |@| require[String](SOURCE_URL)).map(AppConfig)
+    (require[String](APPLICATION),
+     require[String](ENV_NAME),
+     require[Int](PORT),
+     require[String](APP_HOME),
+     require[String](SOURCE_URL)).mapN(AppConfig)
   }
 }
 
