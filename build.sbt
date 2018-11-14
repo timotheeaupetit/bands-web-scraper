@@ -18,7 +18,7 @@ lazy val root = (project in file("."))
     "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
     "de.heikoseeberger" %% "akka-http-circe" % "1.18.0",
     "net.ruippeixotog" % "scala-scraper_2.12" % "2.1.0",
-    "org.typelevel" %% "cats-core" % "0.9.0",
+    "org.typelevel" %% "cats-core" % "1.4.0",
     "org.webjars" % "webjars-locator" % "0.32-1",
   ))
   .settings(libraryDependencies ++= Seq(
