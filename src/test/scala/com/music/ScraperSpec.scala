@@ -3,18 +3,19 @@ package com.music
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import org.specs2.Specification
 import org.specs2.matcher.MatchResult
+import org.specs2.specification.core.SpecStructure
 
 class ScraperSpec extends Specification {
-  def is =
-    s2"""This is the Scraper specification
-            The band name should be 'A Perfect Circle'            $name
-            The year the band was formed should be '1999'         $formed
-            The year the band was disbanded should be '2017'      $disbanded
-            There should be 11 members extracted from content     $members
-            There should be 'Maynard James Keenan' among them     $maynard
-            Jeordie White's aka should be 'Twiggy Ramirez'        $aka
-            Jeordie White left the band in '2004'                 $period
-      """
+  def is: SpecStructure =
+    s2"""
+        | The band name should be 'A Perfect Circle'            $name
+        | The year the band was formed should be '1999'         $formed
+        | The year the band was disbanded should be 'None'      $disbanded
+        | There should be 11 members extracted from content     $members
+        | There should be 'Maynard James Keenan' among them     $maynard
+        | Jeordie White's aka should be 'Twiggy Ramirez'        $aka
+        | Jeordie White left the band in '2004'                 $period
+      """.stripMargin
 
   private val browser = JsoupBrowser()
 
@@ -39,8 +40,6 @@ class ScraperSpec extends Specification {
       |                        <div class="artist_info">
       |                            <div class="info_hdr">Formed</div>
       |                            <div class="info_content"> 1999, <a class="location" href="#">Los Angeles, CA, United States</a></div>
-      |                            <div class="info_hdr">Disbanded</div>
-      |                            <div class="info_content">29 December 2017</div>
       |                            <div class="info_hdr">Members</div>
       |                            <div class="info_content">
       |                                <a title="[Artist579837]" href="#" class="artist">Maynard James Keenan</a> (lead vocals, piano, kalimba, guitar),
@@ -132,30 +131,22 @@ class ScraperSpec extends Specification {
 
   private val content = browser.parseString(htmlPage)
 
-  private val bandPage = Scraper.buildFromDocument(content)
+  private val bandPage = Scraper(content).buildObject
 
-  private val jeordieWhite =
-    bandPage.members.filter(_.fullName == "Jeordie White").head
+  private val jeordieWhite = bandPage.members.filter(_.fullName == "Jeordie White").head
 
-  private def name: MatchResult[String] =
-    bandPage.name must beEqualTo("A Perfect Circle")
+  private def name: MatchResult[String] = bandPage.name must beEqualTo("A Perfect Circle")
 
-  private def formed: MatchResult[Option[Int]] =
-    bandPage.formed.date must beSome(1999)
+  private def formed: MatchResult[Option[Int]] = bandPage.formed.date must beSome(1999)
 
-  private def disbanded: MatchResult[Option[Int]] =
-    bandPage.disbanded.date must beSome(2017)
+  private def disbanded: MatchResult[Option[Int]] = bandPage.disbanded.date must beNone
 
-  private def members: MatchResult[Int] =
-    bandPage.members.length must beEqualTo(11)
+  private def members: MatchResult[Int] = bandPage.members.length must beEqualTo(11)
 
-  private def maynard: MatchResult[Int] =
-    bandPage.members.count(_.fullName == "Maynard James Keenan") must beEqualTo(
-      1)
+  private def maynard: MatchResult[Int] = bandPage.members.count(_.fullName == "Maynard James Keenan") must beEqualTo(1)
 
-  private def aka: MatchResult[Option[String]] =
-    jeordieWhite.aka must beSome("Twiggy Ramirez")
+  private def aka: MatchResult[Option[String]] = jeordieWhite.aka must beSome("Twiggy Ramirez")
 
-  private def period: MatchResult[Option[Int]] =
-    jeordieWhite.periods.head.end must beSome(2004)
+  private def period: MatchResult[Option[Int]] = jeordieWhite.periods.head.end must beSome(2004)
+
 }

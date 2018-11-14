@@ -139,20 +139,20 @@ trait ApplicationConfiguration {
   case object PORT extends EnvironmentVariable("PORT")
   case object APPLICATION extends EnvironmentVariable("APPLICATION")
   case object ENV_NAME extends EnvironmentVariable("ENV_NAME")
-  case object SOURCE_URL extends EnvironmentVariable("SOURCE_URL")
+  case object BASE_URL extends EnvironmentVariable("BASE_URL")
 
   case class AppConfig(application: String,
                        env: String,
                        port: Int,
                        app_home: String,
-                       src_url: String)
+                       base_url: String)
 
   def fApplicationConfig: ValidatedNel[ConfigError, AppConfig] = {
     (require[String](APPLICATION),
      require[String](ENV_NAME),
      require[Int](PORT),
      require[String](APP_HOME),
-     require[String](SOURCE_URL)).mapN(AppConfig)
+     require[String](BASE_URL)).mapN(AppConfig)
   }
 }
 
