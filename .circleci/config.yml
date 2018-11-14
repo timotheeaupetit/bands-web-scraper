@@ -1,9 +1,13 @@
-version: 2
+version: 2.1
+
+executors:
+  project-jdk:
+    docker:
+    - image: openjdk:8
+
 jobs:
   build:
-    working-directory: ~/bands-web-scraper
-    docker:
-      - image: openjdk:8
+    executor: project-jdk
 
     environment:
       - SBT_VERSION: 1.2.6
@@ -24,37 +28,32 @@ jobs:
       - checkout
       - restore_cache:
           key: sbt-cache
+
       - run:
           name: Compile bands-web-scraper dist package
           command: cat /dev/null | sbt clean update dist
+
+      - run:
+          name: Test
+          command: sbt test
+
+      - run:
+          name: Check Scalafmt formatting
+          command: sbt scalafmt::test test:scalafmt::test
+
       - store_artifacts:
           path: target/universal/bands-web-scraper.zip
           destination: bands-web-scraper
+
       - save_cache:
           key: sbt-cache
           paths:
-            - "~/.ivy2/cache"
-            - "~/.sbt"
-            - "~/.m2"
-      - run: echo "Build"
-
-  unit-tests:
-    working-directory: ~/bands-web-scraper
-    docker:
-      - image: openjdk:8
-
-    environment:
-      - SBT_VERSION: 1.2.6
-
-    steps:
-      - checkout
-      - run: echo "Unit tests"
+          - "~/.ivy2/cache"
+          - "~/.sbt"
+          - "~/.m2"
 
 workflows:
-  version: 2
+  version: 2.1
   build-and-test:
     jobs:
       - build
-      - unit-tests:
-          requires:
-            - build
