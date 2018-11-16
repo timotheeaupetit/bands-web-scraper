@@ -20,7 +20,7 @@ case class Processor(baseUrl: String) {
           val bandPage = scraper.buildObject
           sendData(bandPage)
           Thread.sleep(4000)
-        case _ =>
+        case _             =>
           remaining match {
             case Nil  => ()
             case urls =>
@@ -34,8 +34,7 @@ case class Processor(baseUrl: String) {
 
   }
 
-  private def guessUrl(normalizedName: String): String =
-    baseUrl + normalizedName
+  private def guessUrl(normalizedName: String): String = baseUrl + normalizedName
 
   private def potentialNames(bandName: String): Set[String] = {
     val name = TextStripper.normalize(bandName)
