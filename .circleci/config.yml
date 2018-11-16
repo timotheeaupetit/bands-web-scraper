@@ -37,10 +37,6 @@ jobs:
           name: Test
           command: sbt test
 
-      - run:
-          name: Check Scalafmt formatting
-          command: sbt scalafmt::test test:scalafmt::test
-
       - store_artifacts:
           path: target/universal/bands-web-scraper.zip
           destination: bands-web-scraper
