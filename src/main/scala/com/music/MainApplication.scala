@@ -9,7 +9,7 @@ object MainApplication extends App {
     .fold(
       Launcher.showConfigError, { configuration: ProjectConfig =>
         println(configuration.appConfig.application)
-        val processor = Processor(configuration.appConfig.base_url)
+        val processor = Processor(configuration.appConfig.base_url, configuration.appConfig.api_url)
         processor.process()
       }
     )
