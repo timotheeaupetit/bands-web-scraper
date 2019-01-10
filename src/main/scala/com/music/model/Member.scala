@@ -2,8 +2,8 @@ package com.music.model
 
 case class Member(fullName: String,
                   aka: Option[String] = None,
-                  instruments: List[String] = List.empty,
-                  periods: List[Period] = List.empty)
+                  instruments: List[String] = List.empty[String],
+                  periods: List[Period] = List.empty[Period])
 
 case class Period(start: Option[Int], end: Option[Int])
 

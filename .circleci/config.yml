@@ -10,7 +10,7 @@ jobs:
     executor: project-jdk
 
     environment:
-      - SBT_VERSION: 1.2.6
+      - SBT_VERSION: 1.2.7
 
     steps:
       - run: echo 'export ARTIFACT_BUILD=$CIRCLE_PROJECT_REPONAME-$CIRCLE_BUILD_NUM.zip' >> $BASH_ENV
