@@ -7,7 +7,7 @@ import akka.http.scaladsl.model.HttpMethods.POST
 import akka.http.scaladsl.model.{HttpRequest, RequestEntity}
 import akka.stream.ActorMaterializer
 import com.music.model.BandPage
-import com.music.utils.{Resources, TextStripper}
+import com.music.utils.TextStripper
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import io.circe.{Json, Printer}
@@ -17,9 +17,9 @@ import scala.concurrent.{Await, ExecutionContext}
 import scala.util.{Failure, Success}
 
 case class Processor(baseURL: String, apiURL: String) {
-  def process(): Unit = {
+  def process(artists: Set[String]): Unit = {
     println("*** Processing ***")
-    Resources.BANDS.foreach(processOne)
+    artists.foreach(processOne)
   }
 
   private def processOne(band: String): Unit = {
