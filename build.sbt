@@ -6,7 +6,7 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.12.7"
 )
 
-val akkaVersion = "2.5.9"
+val akkaVersion = "2.5.19"
 val akkaHttpVersion = "10.1.1"
 val circeVersion = "0.10.0"
 val specs2Version = "4.0.4"
@@ -18,7 +18,7 @@ lazy val root = (project in file("."))
     "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
     "de.heikoseeberger" %% "akka-http-circe" % "1.23.0",
     "net.ruippeixotog" % "scala-scraper_2.12" % "2.1.0",
-    "org.typelevel" %% "cats-core" % "1.4.0",
+    "org.typelevel" %% "cats-core" % "1.5.0",
     "org.webjars" % "webjars-locator" % "0.32-1",
   ))
   .settings(libraryDependencies ++= Seq(

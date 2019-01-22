@@ -1,11 +1,13 @@
 package com.music
 
+import akka.Done
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.HttpMethods.POST
 import akka.http.scaladsl.model.{HttpRequest, RequestEntity}
 import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.{Flow, Sink, Source}
 import com.music.model.BandPage
 import com.music.utils.TextStripper
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -13,37 +15,25 @@ import io.circe.generic.auto._
 import io.circe.{Json, Printer}
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 case class Processor(baseURL: String, apiURL: String) {
-  def process(artists: Set[String]): Unit = {
+  def process(artists: Set[String])(implicit system: ActorSystem): Future[Done] = {
+    implicit val materializer: ActorMaterializer = ActorMaterializer()
+
     println("*** Processing ***")
-    artists.foreach(processOne)
+
+    Source(artists)
+      .mapConcat(artist => potentialNames(artist).map(guessUrl))
+      .throttle(1, 4.second) // courtesy period, not to flood the website with many requests
+      .runWith(Sink.foreach(processOne))
   }
 
-  private def processOne(band: String): Unit = {
-    println(band)
-    val potentialUrls = potentialNames(band).map(guessUrl).toList
-
-    def tryUrls(current: String, remaining: List[String]): Unit = {
-      Thread.sleep(4000) // courtesy period, not to flood the website with many requests
-      Scraper(current) match {
-        case Some(scraper) =>
-          println(current)
-          val bandPage = scraper.buildObject
-          sendData(bandPage)
-        case _             =>
-          remaining match {
-            case Nil  => ()
-            case urls =>
-              tryUrls(urls.head, urls.tail)
-          }
-      }
-    }
-
-    tryUrls(potentialUrls.head, potentialUrls.tail)
-
+  private def processOne(url: String): Unit = Scraper(url).foreach { scraper =>
+    println(url)
+    val bandPage = scraper.buildObject
+    sendData(bandPage)
   }
 
   private def guessUrl(normalizedName: String): String = baseURL + "/" + normalizedName
