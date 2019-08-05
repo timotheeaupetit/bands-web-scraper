@@ -22,12 +22,7 @@ object MainApplication extends App {
     val processor = Processor(configuration.appConfig.base_url, configuration.appConfig.api_url)
     val artists = fetchArtists(configuration.appConfig.input_file)
 
-    processor.process(artists).onComplete {
-      case Success(_) =>
-        println("*** Done ***")
-        system.terminate
-      case Failure(_) => println("Failure")
-    }
+    processor.process(artists)
   }
 
   final private def fetchArtists(path: String): Set[String] = Try(Source.fromFile(path)) match {
