@@ -1,11 +1,11 @@
-package com.music
+package com.music.scraper
 
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import org.specs2.Specification
 import org.specs2.matcher.MatchResult
 import org.specs2.specification.core.SpecStructure
 
-class ScraperSpec extends Specification {
+class RYMScraperSpec extends Specification {
   def is: SpecStructure =
     s2"""
         | The band name should be 'A Perfect Circle'            $name
@@ -131,7 +131,7 @@ class ScraperSpec extends Specification {
 
   private val content = browser.parseString(htmlPage)
 
-  private val bandPage = Scraper(content).buildObject
+  private val bandPage = RYMScraper(content).buildObject
 
   private val jeordieWhite = bandPage.members.filter(_.fullName == "Jeordie White").head
 

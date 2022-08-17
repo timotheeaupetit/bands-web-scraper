@@ -1,4 +1,4 @@
-package com.music
+package com.music.scraper
 
 import com.music.model.{BandPage, Disbanded, Formed, Member}
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
@@ -9,23 +9,23 @@ import net.ruippeixotog.scalascraper.scraper.ContentExtractors._
 
 import scala.util.Try
 
-case class Scraper(document: Document) {
+case class RYMScraper(document: Document) extends Scraper {
 
-  private def getBandName: String = document >> element("h1.artist_name_hdr") >> text
+  override def getBandName: String = document >> element("h1.artist_name_hdr") >> text
 
-  private def getFormed(info: Map[String, Element]): Formed =
+  def getFormed(info: Map[String, Element]): Formed =
     Try(info("Formed") >> elementList(".info_content") >> text).toOption match {
       case Some(raw) => raw.map(Formed.apply).head
       case _         => Formed(None)
     }
 
-  private def getDisbanded(info: Map[String, Element]): Disbanded =
+  def getDisbanded(info: Map[String, Element]): Disbanded =
     Try(info("Disbanded") >> elementList(".info_content") >> text).toOption match {
       case Some(raw) => raw.map(Disbanded.apply).head
       case _         => Disbanded(None)
     }
 
-  private def getMembers(info: Map[String, Element]): List[Member] = {
+  def getMembers(info: Map[String, Element]): List[Member] = {
     val rawMembers = info("Members") >> element(".info_content") >> text
 
     val members = rawMembers.split("\\),\\s").toList
@@ -33,9 +33,9 @@ case class Scraper(document: Document) {
     members.map(Member.apply)
   }
 
-  private def getDiscography: List[Element] = document >> elementList("#disco_type_s")
+  def getDiscography: List[Element] = document >> elementList("#disco_type_s")
 
-  private def getArtistInfo: Map[String, Element] = {
+  def getArtistInfo: Map[String, Element] = {
     val info = document >> element(".section_artist_info .artist_info")
     val headers = getHeaders(info)
     val details = getDetails(info)
@@ -43,13 +43,13 @@ case class Scraper(document: Document) {
     headers.zip(details).toMap
   }
 
-  private def getHeaders(element: Element): List[String] =
+  def getHeaders(element: Element): List[String] =
     element >> elementList(".info_hdr") >> text
 
-  private def getDetails(element: Element): List[Element] =
+  def getDetails(element: Element): List[Element] =
     element >> elementList(".info_content")
 
-  def buildObject: BandPage = {
+  override def buildObject: BandPage = {
 
     val info = getArtistInfo
 
@@ -57,12 +57,12 @@ case class Scraper(document: Document) {
   }
 }
 
-object Scraper {
-  def apply(pageUrl: String): Option[Scraper] = {
+object RYMScraper {
+  def apply(pageUrl: String): Option[RYMScraper] = {
     val browser = JsoupBrowser()
     val maybeDocument = Try(browser.get(pageUrl)).toOption
 
-    maybeDocument.map(document => Scraper(document))
+    maybeDocument.map(document => RYMScraper(document))
   }
 
 }

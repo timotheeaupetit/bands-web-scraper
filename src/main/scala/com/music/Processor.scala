@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.HttpMethods.POST
 import akka.http.scaladsl.model.{HttpRequest, RequestEntity}
 import akka.stream.ActorMaterializer
 import com.music.model.BandPage
+import com.music.scraper.RYMScraper
 import com.music.utils.TextStripper
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
@@ -29,7 +30,7 @@ case class Processor(baseURL: String, apiURL: String) {
     println("*** Done ***")
   }
 
-  private def processOne(url: String): Unit = Scraper(url).foreach { scraper =>
+  private def processOne(url: String): Unit = RYMScraper(url).foreach { scraper =>
     println(url)
     val bandPage = scraper.buildObject
     sendData(bandPage)
