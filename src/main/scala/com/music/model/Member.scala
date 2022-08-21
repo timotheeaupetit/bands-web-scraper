@@ -1,21 +1,26 @@
 package com.music.model
 
+import scala.annotation.tailrec
+
 case class Member(fullName: String,
                   aka: Option[String] = None,
                   instruments: List[String] = List.empty[String],
-                  periods: List[Period] = List.empty[Period])
+                  periods: List[Period] = List.empty[Period],
+                  isActive: Boolean)
 
 case class Period(start: Option[Int], end: Option[Int])
 
 object Member {
   def apply(member: String): Member = {
     val details = mapInstrumentsAndPeriods(member)
+    val periods = details("periods").map(toPeriod)
 
     Member(
       fullName = getFullName(member),
       aka = getAka(member),
       instruments = details("instruments"),
-      periods = details("periods").map(toPeriod)
+      periods = periods,
+      isActive = getIsActive(periods)
     )
   }
 
@@ -39,6 +44,17 @@ object Member {
     }
   }
 
+  private def getIsActive(periods: List[Period]): Boolean = {
+    @tailrec
+    def loop(isActive: Boolean, remain: List[Period]): Boolean = remain match {
+      case Nil                                          => isActive
+      case x::tail if x.end.isEmpty                     => loop(isActive = true, tail)
+      case _                                            => loop(isActive = isActive, remain.tail)
+    }
+
+    loop(isActive = false, periods)
+  }
+
   private def mapInstrumentsAndPeriods(raw: String): Map[String, List[String]] = {
     val rgxDetails = """\((.+)""".r
     val details = rgxDetails.findFirstIn(raw).getOrElse("")
@@ -47,6 +63,7 @@ object Member {
     val rgxPeriod =
       """(^[0-9]{4}$|^[0-9]{4}\-[0-9]{2,4}$|^[0-9]{4}\-present$)""".r
 
+    @tailrec
     def loop(input: List[String], output: Map[String, List[String]]): Map[String, List[String]] = input match {
       case Nil    => output
       case remain =>

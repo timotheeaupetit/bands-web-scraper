@@ -13,8 +13,11 @@ class RYMScraperSpec extends Specification {
         | The year the band was disbanded should be 'None'      $disbanded
         | There should be 11 members extracted from content     $members
         | There should be 'Maynard James Keenan' among them     $maynard
+        | James Iha should be active                            $active
+        | Annie Cordy shouldn't be an active or past member     $cordy
         | Jeordie White's aka should be 'Twiggy Ramirez'        $aka
         | Jeordie White left the band in '2004'                 $period
+        | Jeordie White should be inactive                      $inactive
       """.stripMargin
 
   private val browser = JsoupBrowser()
@@ -145,8 +148,14 @@ class RYMScraperSpec extends Specification {
 
   private def maynard: MatchResult[Int] = bandPage.members.count(_.fullName == "Maynard James Keenan") must beEqualTo(1)
 
+  private def active: MatchResult[Boolean] = bandPage.members.filter(_.fullName == "James Iha").head.isActive must beTrue
+
+  private def cordy: MatchResult[Int] = bandPage.members.count(_.fullName == "Annie Cordy") must beEqualTo(0)
+
   private def aka: MatchResult[Option[String]] = jeordieWhite.aka must beSome("Twiggy Ramirez")
 
   private def period: MatchResult[Option[Int]] = jeordieWhite.periods.head.end must beSome(2004)
+
+  private def inactive: MatchResult[Boolean] = jeordieWhite.isActive must beFalse
 
 }
